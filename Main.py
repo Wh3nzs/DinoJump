@@ -7,6 +7,8 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("dino jump")
 pygame.display.set_icon(pygame.image.load("assets/dino.png"))
 
+
+font = pygame.font.Font(None, 36)
 class Dino:
     def __init__(self):
         self.image = pygame.image.load("assets/dino.png").convert_alpha()
@@ -120,6 +122,9 @@ class cati:
 
         if(self.x < -self.width):
             self.spawn()
+    def colision(self, dino):
+        cati_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
+        return cati_rect.colliderect(dino.rect)
 
     def draw(self):
         scaled_image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -143,6 +148,7 @@ def GameLoop():
     running = True
     while running:
 
+
         dt = pygame.time.Clock().tick(60) / 1000  # Delta time in seconds
 
         screen.fill((25, 25, 25))
@@ -154,10 +160,18 @@ def GameLoop():
             bird.velocity[0] = -500  # Move left at 500 pixels per second
             bird.update(dt)
             bird.draw()
+            if bird.collision(dino):
+                print("Collision detected!")
+                diedscreen()
+                running = False
         for cati in catis:
             cati.velocity[0] = -500  # Move left at 500 pixels per
             cati.update(dt)
             cati.draw()
+            if cati.collision(dino):
+                print("Collision detected!")
+                diedscreen()
+                running = False
 
             if bird.collision(dino):
                 print("Collision detected!")
@@ -182,11 +196,15 @@ def diedscreen():
     running = True
     while running:
         screen.fill((0, 0, 0))
+        text = font.render("Game Over", True, (255, 255, 255))
+        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
 
-        for event in pygame.event.get():
+        for event in pygame.event.get():  
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     running = False
+        pygame.display.flip()
+
 def menu():
     running = True
     while running:
@@ -196,5 +214,6 @@ def menu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     running = False
+        pygame.display.flip()
 
 GameLoop()
