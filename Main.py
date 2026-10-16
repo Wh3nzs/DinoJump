@@ -74,6 +74,7 @@ class birds:
 
         if(self.x < -self.width):
             self.spawn()
+            self.delete()
 
     def draw(self):
         scaled_image = pygame.transform.scale(self.image, (self.width, self.height))
@@ -89,6 +90,8 @@ class birds:
     def collision(self, dino):
         bird_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
         return bird_rect.colliderect(dino.rect)
+    def delete(self):
+        del self
 
 class cati:
     def __init__(self, x, y):
@@ -122,6 +125,7 @@ class cati:
 
         if(self.x < -self.width):
             self.spawn()
+            self.delete()
     def colision(self, dino):
         cati_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
         return cati_rect.colliderect(dino.rect)
@@ -140,18 +144,46 @@ class cati:
     def collision(self, dino):
         cati_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
         return cati_rect.colliderect(dino.rect)
+    def delete(self):
+        del self
+    
+class button:
+    def __init__(self, x, y, width, height, text):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.font = pygame.font.Font(None, 36)
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, (255, 255, 255), self.rect)
+        text_surface = self.font.render(self.text, True, (0, 0, 0))
+        text_rect = text_surface.get_rect(center=self.rect.center)
+        surface.blit(text_surface, text_rect)
+
+    def is_clicked(self, mouse_pos):
+        return self.rect.collidepoint(mouse_pos)
+buttons = [button(WIDTH // 2 - 100, HEIGHT // 2 - 25, 200, 50, "Start Game")]
 
 dino = Dino()
 birds = [birds(WIDTH + i * 300, random.randint(50, HEIGHT - 50)) for i in range(5)]
 catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
+
+
 def GameLoop():
+    obsticals = birds + catis
+    for obstical in obsticals[:]:
+        if obstical.collision(dino):
+            print("Collision detected!")
+            obsticals.remove(obstical)
+    
     running = True
     while running:
 
 
+        screen.fill((25, 25, 25))
+
+
         dt = pygame.time.Clock().tick(60) / 1000  # Delta time in seconds
 
-        screen.fill((25, 25, 25))
         dino.draw(screen) 
         dino.gravity(dt)  # Assuming a frame rate of 60 FPS
 
@@ -162,16 +194,14 @@ def GameLoop():
             bird.draw()
             if bird.collision(dino):
                 print("Collision detected!")
-                diedscreen()
-                running = False
+                # running = False
         for cati in catis:
             cati.velocity[0] = -500  # Move left at 500 pixels per
             cati.update(dt)
             cati.draw()
             if cati.collision(dino):
                 print("Collision detected!")
-                diedscreen()
-                running = False
+                # running = False
 
             if bird.collision(dino):
                 print("Collision detected!")
@@ -192,28 +222,8 @@ def GameLoop():
 
                     if dino.groundCheck():
                         dino.jump(dt)
-def diedscreen():
-    running = True
-    while running:
-        screen.fill((0, 0, 0))
-        text = font.render("Game Over", True, (255, 255, 255))
-        screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 2 - text.get_height() // 2))
-
-        for event in pygame.event.get():  
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    running = False
-        pygame.display.flip()
-
-def menu():
-    running = True
-    while running:
-        screen.fill((0, 0, 0))
-
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    running = False
-        pygame.display.flip()
-
+                if event.key == pygame.K_f:
+                    print(f"Number of birds: {len(birds)}")
+                if event.key == pygame.K_c:
+                    print(f"Number of cats: {len(catis)}")
 GameLoop()
