@@ -17,7 +17,7 @@ class Dino:
         self.rect = self.image.get_rect()
         self.rect.topleft = (100, HEIGHT - 100)
         self.velocity = 0
-        self.gravity_force = 981  # Pixels per second squared
+        self.gravity_force = 1069  # Pixels per second squared
     def gravity(self, dt):
         self.velocity += self.gravity_force * dt
         self.rect.y += self.velocity * dt
@@ -76,6 +76,7 @@ class birds:
             self.spawn()
             self.delete()
 
+
     def draw(self):
         scaled_image = pygame.transform.scale(self.image, (self.width, self.height))
         # pygame.draw.rect(screen, (0,0,255), (self.x - self.width // 2, self.y - self.height // 2, self.width, self.height), 1) # Hitbox
@@ -90,7 +91,8 @@ class birds:
     def collision(self, dino):
         bird_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
         return bird_rect.colliderect(dino.rect)
-    def delete(self):
+    def delete(self): 
+        return 1 
         del self
 
 class cati:
@@ -145,6 +147,7 @@ class cati:
         cati_rect = pygame.Rect(self.x - self.width // 2, self.y - self.height // 2, self.width, self.height)
         return cati_rect.colliderect(dino.rect)
     def delete(self):
+        return 1 
         del self
     
 class button:
@@ -170,20 +173,23 @@ catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
 
 def GameLoop():
     obsticals = birds + catis
-    for obstical in obsticals[:]:
-        if obstical.collision(dino):
-            print("Collision detected!")
-            obsticals.remove(obstical)
+    global dino
+    dino = Dino()
+    for o in birds + catis:
+        o.spawn()
     
     running = True
+    total = 0
     while running:
 
 
-        screen.fill((25, 25, 25))
+        screen.fill((25, 25, 170))
 
 
         dt = pygame.time.Clock().tick(60) / 1000  # Delta time in seconds
 
+        total += dt
+        print(total)
         dino.draw(screen) 
         dino.gravity(dt)  # Assuming a frame rate of 60 FPS
 
@@ -194,6 +200,8 @@ def GameLoop():
             bird.draw()
             if bird.collision(dino):
                 print("Collision detected!")
+                running = False
+                return  "died"
                 # running = False
         for cati in catis:
             cati.velocity[0] = -500  # Move left at 500 pixels per
@@ -201,6 +209,8 @@ def GameLoop():
             cati.draw()
             if cati.collision(dino):
                 print("Collision detected!")
+                running = False 
+                return "died"
                 # running = False
 
             if bird.collision(dino):
@@ -226,4 +236,18 @@ def GameLoop():
                     print(f"Number of birds: {len(birds)}")
                 if event.key == pygame.K_c:
                     print(f"Number of cats: {len(catis)}")
-GameLoop()
+
+
+def died():
+    running = True
+    while running:
+        screen.fill((255,0,0))
+        GameLoop()
+
+        pygame.display.flip()
+scene = "game"
+while True:
+    if scene == "game":
+        scene = GameLoop()
+    elif scene == "died":
+        died()
