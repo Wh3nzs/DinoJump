@@ -1,5 +1,4 @@
-import pygame
-import random
+import pygame, random, json, os
 
 pygame.init()
 WIDTH, HEIGHT = 800, 600
@@ -169,7 +168,22 @@ buttons = [button(WIDTH // 2 - 100, HEIGHT // 2 - 25, 200, 50, "Start Game")]
 dino = Dino()
 birds = [birds(WIDTH + i * 300, random.randint(50, HEIGHT - 50)) for i in range(5)]
 catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
+SAVE = "save.json"
+data = {"highscore": 0, "skins": ["default", "cat", "bird"], "current_skin": "default"}
+with open(SAVE, "w") as f:
+    json.dump(data, f)
 
+def loadScore():
+    if os.path.exists(SAVE):
+        with open(SAVE, "r") as f:
+            data = json.load(f)
+            return data.get("highscore", 0)
+    else:
+        return 0
+def saveScore(score):
+    data = {"highscore": score}
+    with open(SAVE, "w") as f:
+        json.dump(data, f)
 
 def GameLoop():
     obsticals = birds + catis
@@ -201,7 +215,9 @@ def GameLoop():
             if bird.collision(dino):
                 print("Collision detected!")
                 running = False
+                saveScore(total)
                 return  "died"
+
                 # running = False
         for cati in catis:
             cati.velocity[0] = -500  # Move left at 500 pixels per
@@ -210,6 +226,7 @@ def GameLoop():
             if cati.collision(dino):
                 print("Collision detected!")
                 running = False 
+                saveScore(total)
                 return "died"
                 # running = False
 
