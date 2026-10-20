@@ -16,7 +16,8 @@ class Dino:
         self.rect = self.image.get_rect()
         self.rect.topleft = (100, HEIGHT - 100)
         self.velocity = 0
-        self.gravity_force = 1069  # Pixels per second squared
+        self.gravity_force = 1200  # Pixels per second squared
+        self.mode = None
     def gravity(self, dt):
         self.velocity += self.gravity_force * dt
         self.rect.y += self.velocity * dt
@@ -28,7 +29,32 @@ class Dino:
 
     def jump(self,dt):
         self.velocity = -350  # Jump velocity in pixels per second
+    def inputhanderler(self, event):
+        keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_s]:
+                self.image = pygame.transform.scale(self.image,(50,30))
+                self.rect.size = self.image.get_size()
+                self.gravity_force = 1500
+                self.rect = pygame.Rect(self.rect.x,self.rect.y,50,30)
+        else:
+            self.image = pygame.transform.scale(self.image,(30,50))
+            self.rect.size = self.image.get_size()
+            self.rect = pygame.Rect(self.rect.x,self.rect.y,30,50)
+            self.gravity_force = 1200
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and self.groundCheck():
+                self.velocity = -350
+            if event.key == pygame.K_p:
+                self.mode = input("what mode would you like to go to: ")
+
+        if self.mode == "god":
+            self.rect = pygame.Rect(self.rect.x,self.rect.y,1,1)
+
+
+                    
+                
     def groundCheck(self):
         if self.rect.bottom >= HEIGHT:
             self.rect.bottom = HEIGHT
@@ -38,6 +64,8 @@ class Dino:
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+        pygame.draw.rect(screen, (255, 0, 0), dino.rect, 2)
 
 
 
@@ -239,20 +267,18 @@ def GameLoop():
 
         for event in pygame.event.get():
 
+            dino.inputhanderler(event)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
             if event.type == pygame.KEYDOWN:
 
-                if event.key == pygame.K_SPACE:
-
-                    if dino.groundCheck():
-                        dino.jump(dt)
                 if event.key == pygame.K_f:
                     print(f"Number of birds: {len(birds)}")
                 if event.key == pygame.K_c:
                     print(f"Number of cats: {len(catis)}")
+
 
 
 def died():
