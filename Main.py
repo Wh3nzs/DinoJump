@@ -7,9 +7,11 @@ pygame.display.set_caption("dino jump")
 pygame.display.set_icon(pygame.image.load("assets/dino.png"))
 
 
+
+
 font = pygame.font.Font(None, 36)
 class Dino:
-    def __init__(self):
+    def __init__(self): 
         self.image = pygame.image.load("assets/dino.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 50))
 
@@ -161,7 +163,7 @@ class cati:
 
     def draw(self):
         scaled_image = pygame.transform.scale(self.image, (self.width, self.height))
-        # pygame.draw.rect(screen, (255,0,255), (self.x - self.width // 2, self.y - self.height // 2, self.width, self.height), 1) # Hitbox
+        pygame.draw.rect(screen, (255,0,255), (self.x - self.width // 2, self.y - self.height // 2, self.width, self.height), 1) # Hitbox
         rect = scaled_image.get_rect(center=(self.x, self.y))
         screen.blit(scaled_image, rect)
 
