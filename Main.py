@@ -34,25 +34,30 @@ class Dino:
     def inputhanderler(self, event):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_s]:
-                self.image = pygame.transform.scale(self.image,(50,30))
-                self.rect.size = self.image.get_size()
-                self.gravity_force = 1500
-                self.rect = pygame.Rect(self.rect.x,self.rect.y,50,30)
-        else:
-            self.image = pygame.transform.scale(self.image,(30,50))
-            self.rect.size = self.image.get_size()
-            self.rect = pygame.Rect(self.rect.x,self.rect.y,30,50)
-            self.gravity_force = 1200
+        self.original_image = self.image          # keep the untouched sprite
+        self.mode = "normal"
+
+        # in update / handle_input
+        keys = pygame.key.get_pressed()
+
+        crouching = keys[pygame.K_s]
+        size = (50, 30) if crouching else (30, 50)
+        self.gravity_force = 1500 if crouching else 1200
+
+        if self.rect.size != size:                # only rebuild when the state changes
+            midbottom = self.rect.midbottom       # remember where the feet are
+            self.image = pygame.transform.scale(self.original_image, size)
+            self.rect = self.image.get_rect(midbottom=midbottom)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and self.groundCheck():
                 self.velocity = -350
-            if event.key == pygame.K_p:
-                self.mode = input("what mode would you like to go to: ")
+            if event.key == pygame.K_p:           # toggle instead of blocking on input()
+                self.mode = "god" if self.mode != "god" else "normal"
 
         if self.mode == "god":
-            self.rect = pygame.Rect(self.rect.x,self.rect.y,1,1)
+            # skip gravity / collisions here rather than shrinking the rect
+            pass
 
 
                     
@@ -215,6 +220,10 @@ def saveScore(score):
     with open(SAVE, "w") as f:
         json.dump(data, f)
 
+
+bacground_image = pygame.image.load("assets/background.png").convert()
+bacground_image = pygame.transform.scale(bacground_image, (WIDTH, HEIGHT))
+
 def GameLoop():
     obsticals = birds + catis
     global dino
@@ -227,7 +236,7 @@ def GameLoop():
     while running:
 
 
-        screen.fill((25, 25, 170))
+        screen.blit(bacground_image, (0,0))
 
 
         dt = pygame.time.Clock().tick(60) / 1000  # Delta time in seconds
