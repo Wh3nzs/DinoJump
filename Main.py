@@ -42,7 +42,7 @@ class Dino:
 
         crouching = keys[pygame.K_s]
         size = (50, 30) if crouching else (30, 50)
-        self.gravity_force = 1500 if crouching else 1200
+        self.gravity_force = 1700 if crouching else 1200
 
         if self.rect.size != size:                # only rebuild when the state changes
             midbottom = self.rect.midbottom       # remember where the feet are
