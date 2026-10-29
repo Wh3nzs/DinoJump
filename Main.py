@@ -6,7 +6,7 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("dino jump")
 pygame.display.set_icon(pygame.image.load("assets/dino.png"))
 
-
+score_font = pygame.font.SysFont("fixed", 30)
 
 
 font = pygame.font.Font(None, 36)
@@ -294,9 +294,13 @@ def GameLoop():
 
 def died():
     running = True
+    font = pygame.font.Font(None, 72)
+    dead_text = font.render("YOU DIED", True, (0, 0, 0))
+    text_rect = dead_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
     while running:
         screen.fill((255,0,0))
-        GameLoop()
+        screen.blit(dead_text, text_rect)
 
         pygame.display.flip()
 scene = "game"
