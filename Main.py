@@ -42,7 +42,7 @@ class Dino:
 
         crouching = keys[pygame.K_s]
         size = (50, 30) if crouching else (30, 50)
-        self.gravity_force = 1700 if crouching else 1200
+        self.gravity_force = 1800 if crouching else 850
 
         if self.rect.size != size:                # only rebuild when the state changes
             midbottom = self.rect.midbottom       # remember where the feet are
@@ -53,11 +53,13 @@ class Dino:
             if event.key == pygame.K_SPACE and self.groundCheck():
                 self.velocity = -350
             if event.key == pygame.K_p:           # toggle instead of blocking on input()
-                self.mode = "god" if self.mode != "god" else "normal"
+                size = (2, 2)
 
+    def update(self):
         if self.mode == "god":
-            # skip gravity / collisions here rather than shrinking the rect
-            pass
+            size = (10, 10)
+
+
 
 
                     
@@ -113,7 +115,7 @@ class birds:
 
     def draw(self):
         scaled_image = pygame.transform.scale(self.image, (self.width, self.height))
-        # pygame.draw.rect(screen, (0,0,255), (self.x - self.width // 2, self.y - self.height // 2, self.width, self.height), 1) # Hitbox
+        pygame.draw.rect(screen, (0,0,255), (self.x - self.width // 2, self.y - self.height // 2, self.width, self.height), 1) # Hitbox
         rect = scaled_image.get_rect(center=(self.x, self.y))
         screen.blit(scaled_image, rect)
 
@@ -173,7 +175,7 @@ class cati:
         screen.blit(scaled_image, rect)
 
     def spawn(self):
-        self.x = WIDTH + self.width + random.randint(0, 700)
+        self.x = WIDTH + self.width + random.randint(0, 1000)
         self.y = HEIGHT - self.height / 2
         self.velocity[0] = -200  # Move left at 200 pixels per second
 
@@ -245,6 +247,7 @@ def GameLoop():
         print(total)
         dino.draw(screen) 
         dino.gravity(dt)  # Assuming a frame rate of 60 FPS
+        dino.update()
 
         # put all draws before the flip
         for bird in birds:
@@ -289,6 +292,7 @@ def GameLoop():
                     print(f"Number of birds: {len(birds)}")
                 if event.key == pygame.K_c:
                     print(f"Number of cats: {len(catis)}")
+
 
 
 
