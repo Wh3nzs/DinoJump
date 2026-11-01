@@ -1,5 +1,7 @@
 import pygame, random, json, os
 
+from pygame import math
+
 pygame.init()
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -13,7 +15,9 @@ font = pygame.font.Font(None, 36)
 class Dino:
     def __init__(self): 
         self.image = pygame.image.load("assets/dino.png").convert_alpha()
+        self.squatimg = pygame.image.load("assets/squat.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (50, 50))
+        self.squatimg = pygame.transform.scale(self.squatimg, (50, 30))
 
         self.rect = self.image.get_rect()
         self.rect.topleft = (100, HEIGHT - 100)
@@ -42,7 +46,9 @@ class Dino:
 
         crouching = keys[pygame.K_s]
         size = (50, 30) if crouching else (30, 50)
+        self.image = self.squatimg if crouching else self.original_image
         self.gravity_force = 1800 if crouching else 850
+        self.original_image = pygame.image.load("assets/dino.png").convert_alpha() if not crouching else pygame.image.load("assets/squat.png").convert_alpha()
 
         if self.rect.size != size:                # only rebuild when the state changes
             midbottom = self.rect.midbottom       # remember where the feet are
@@ -56,8 +62,9 @@ class Dino:
                 size = (2, 2)
 
     def update(self):
-        if self.mode == "god":
-            size = (10, 10)
+        # Update the rect position based on the current image size
+        midbottom = self.rect.midbottom
+        self.rect = self.image.get_rect(midbottom=midbottom)
 
 
 
@@ -121,7 +128,7 @@ class birds:
 
     def spawn(self):
         self.x = WIDTH + self.width + random.randint(0, 700)
-        self.y = random.randint(0, HEIGHT - self.height)
+        self.y = random.randint(300, HEIGHT - 50)
         self.velocity[0] = -200  # Move left at 200 pixels per second
 
     def collision(self, dino):
@@ -206,7 +213,8 @@ dino = Dino()
 birds = [birds(WIDTH + i * 300, random.randint(50, HEIGHT - 50)) for i in range(5)]
 catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
 SAVE = "save.json"
-data = {"highscore": 0, "skins": ["default", "cat", "bird"], "current_skin": "default"}
+data = {"highscore": 0, "Name": "None", "current_skin": "default"}
+
 with open(SAVE, "w") as f:
     json.dump(data, f)
 
@@ -242,8 +250,11 @@ def GameLoop():
 
 
         dt = pygame.time.Clock().tick(60) / 1000  # Delta time in seconds
-
+        import math
         total += dt
+        total = round(total, 2)
+        global score
+        score = total
         print(total)
         dino.draw(screen) 
         dino.gravity(dt)  # Assuming a frame rate of 60 FPS
@@ -257,7 +268,10 @@ def GameLoop():
             if bird.collision(dino):
                 print("Collision detected!")
                 running = False
-                saveScore(total)
+                if data["highscore"] < total:
+                    data["highscore"] = total
+                    data["Name"] = input(str("Enter your name: "))
+                    saveScore(total)
                 return  "died"
 
                 # running = False
@@ -268,7 +282,10 @@ def GameLoop():
             if cati.collision(dino):
                 print("Collision detected!")
                 running = False 
-                saveScore(total)
+                if data["highscore"] < total:
+                    data["highscore"] = total
+                    data["Name"] = input(str("Enter your name: "))
+                    saveScore(total)
                 return "died"
                 # running = False
 
@@ -299,8 +316,12 @@ def GameLoop():
 def died():
     running = True
     font = pygame.font.Font(None, 72)
-    dead_text = font.render("YOU DIED", True, (0, 0, 0))
+    dead_text = font.render("YOU DIED " + "Score: " + str(score), True, (0, 0, 0))
     text_rect = dead_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+
+    font = pygame.font.Font(None, 72)
+    highScore_text = font.render("High score: " + str(data["highscore"]) + " by " + data["Name"], True, (0, 0, 0))
+    highscoreRect = highScore_text.get_rect(center=(WIDTH // 2, HEIGHT // 1.5))
 
     while True:
 
@@ -317,6 +338,7 @@ def died():
                     return "game"
         screen.fill((255,0,0))
         screen.blit(dead_text, text_rect)
+        screen.blit(highScore_text, highscoreRect)
         pygame.display.flip()
 
 scene = "game"
