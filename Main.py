@@ -225,8 +225,8 @@ def loadScore():
             return data.get("highscore", 0)
     else:
         return 0
-def saveScore(score):
-    data = {"highscore": score}
+def save(score,name):
+    data = {"highscore": score, "Name": name}
     with open(SAVE, "w") as f:
         json.dump(data, f)
 
@@ -271,7 +271,7 @@ def GameLoop():
                 if data["highscore"] < total:
                     data["highscore"] = total
                     data["Name"] = input(str("Enter your name: "))
-                    saveScore(total)
+                    save(total, data["Name"])
                 return  "died"
 
                 # running = False
@@ -285,7 +285,7 @@ def GameLoop():
                 if data["highscore"] < total:
                     data["highscore"] = total
                     data["Name"] = input(str("Enter your name: "))
-                    saveScore(total)
+                    save(total, data["Name"])
                 return "died"
                 # running = False
 
