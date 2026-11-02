@@ -66,11 +66,6 @@ class Dino:
         midbottom = self.rect.midbottom
         self.rect = self.image.get_rect(midbottom=midbottom)
 
-
-
-
-                    
-                
     def groundCheck(self):
         if self.rect.bottom >= HEIGHT:
             self.rect.bottom = HEIGHT
@@ -215,24 +210,65 @@ catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
 SAVE = "save.json"
 data = {"highscore": 0, "Name": "None", "current_skin": "default"}
 
-with open(SAVE, "w") as f:
-    json.dump(data, f)
+# Load the existing save instead of wiping it every launch
+if os.path.exists(SAVE):
+    try:
+        with open(SAVE, "r") as f:
+            data.update(json.load(f))
+    except (json.JSONDecodeError, OSError):
+        pass
+
 
 def loadScore():
-    if os.path.exists(SAVE):
-        with open(SAVE, "r") as f:
-            data = json.load(f)
-            return data.get("highscore", 0)
-    else:
-        return 0
-def save(score,name):
-    data = {"highscore": score, "Name": name}
+    return data.get("highscore", 0)
+
+
+def save(score, name):
+    data["highscore"] = score
+    data["Name"] = name
     with open(SAVE, "w") as f:
         json.dump(data, f)
 
 
+def ask_name(prompt="New high score! Enter your name:", max_len=12):
+    pygame.event.clear()  # drop any leftover keypresses from gameplay
+    clock = pygame.time.Clock()
+    name_font = pygame.font.Font(None, 56)
+    prompt_font = pygame.font.Font(None, 40)
+    name = ""
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    return name.strip() or "None"
+                elif event.key == pygame.K_BACKSPACE:
+                    name = name[:-1]
+                elif event.unicode and event.unicode.isprintable() and len(name) < max_len:
+                    name += event.unicode
+
+        screen.fill((30, 30, 30))
+
+        prompt_surf = prompt_font.render(prompt, True, (255, 255, 255))
+        screen.blit(prompt_surf, prompt_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60)))
+
+        # blinking cursor
+        cursor = "|" if (pygame.time.get_ticks() // 500) % 2 == 0 else ""
+        name_surf = name_font.render(name + cursor, True, (255, 255, 0))
+        screen.blit(name_surf, name_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+
 bacground_image = pygame.image.load("assets/background.png").convert()
 bacground_image = pygame.transform.scale(bacground_image, (WIDTH, HEIGHT))
+
+diedscreenBG = pygame.image.load("assets/diedBG.png").convert()
+diedscreenBG = pygame.transform.scale(diedscreenBG, (WIDTH, HEIGHT))
 
 def GameLoop():
     obsticals = birds + catis
@@ -255,7 +291,6 @@ def GameLoop():
         total = round(total, 2)
         global score
         score = total
-        print(total)
         dino.draw(screen) 
         dino.gravity(dt)  # Assuming a frame rate of 60 FPS
         dino.update()
@@ -266,31 +301,20 @@ def GameLoop():
             bird.update(dt)
             bird.draw()
             if bird.collision(dino):
-                print("Collision detected!")
                 running = False
                 if data["highscore"] < total:
-                    data["highscore"] = total
-                    data["Name"] = input(str("Enter your name: "))
-                    save(total, data["Name"])
-                return  "died"
+                    save(total, ask_name())
+                return "died"
 
-                # running = False
         for cati in catis:
-            cati.velocity[0] = -500  # Move left at 500 pixels per
+            cati.velocity[0] = -500  # Move left at 500 pixels per second
             cati.update(dt)
             cati.draw()
             if cati.collision(dino):
-                print("Collision detected!")
                 running = False 
                 if data["highscore"] < total:
-                    data["highscore"] = total
-                    data["Name"] = input(str("Enter your name: "))
-                    save(total, data["Name"])
+                    save(total, ask_name())
                 return "died"
-                # running = False
-
-            if bird.collision(dino):
-                print("Collision detected!")
 
 
         pygame.display.flip()
@@ -336,7 +360,7 @@ def died():
 
                 if event.key == pygame.K_SPACE:
                     return "game"
-        screen.fill((255,0,0))
+        screen.blit(diedscreenBG, (0, 0))
         screen.blit(dead_text, text_rect)
         screen.blit(highScore_text, highscoreRect)
         pygame.display.flip()
