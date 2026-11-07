@@ -47,7 +47,7 @@ class Dino:
         crouching = keys[pygame.K_s]
         size = (50, 30) if crouching else (30, 50)
         self.image = self.squatimg if crouching else self.original_image
-        self.gravity_force = 1800 if crouching else 850
+        self.gravity_force = 2000 if crouching else 850
         self.original_image = pygame.image.load("assets/dino.png").convert_alpha() if not crouching else pygame.image.load("assets/squat.png").convert_alpha()
 
         if self.rect.size != size:                # only rebuild when the state changes
@@ -123,7 +123,7 @@ class birds:
 
     def spawn(self):
         self.x = WIDTH + self.width + random.randint(0, 700)
-        self.y = random.randint(300, HEIGHT - 50)
+        self.y = random.randint(300, HEIGHT - 75)
         self.velocity[0] = -200  # Move left at 200 pixels per second
 
     def collision(self, dino):
