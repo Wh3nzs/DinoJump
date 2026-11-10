@@ -365,9 +365,28 @@ def died():
         screen.blit(highScore_text, highscoreRect)
         pygame.display.flip()
 
-scene = "game"
+def show_start_screen():
+    running = True
+    while running:
+        screen.fill((0, 0, 0))
+        for button in buttons:
+            button.draw(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if button.is_clicked(event.pos):
+                    return "game"
+
+        pygame.display.flip()
+
+scene = "start"
 while True:
     if scene == "game":
         scene = GameLoop()
     elif scene == "died":
         scene = died()
+    elif scene == "start":
+        scene = show_start_screen()
