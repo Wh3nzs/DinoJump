@@ -195,15 +195,16 @@ class button:
         self.font = pygame.font.Font(None, 36)
 
     def draw(self, surface):
-        pygame.draw.rect(surface, (255, 255, 255), self.rect)
-        text_surface = self.font.render(self.text, True, (0, 0, 0))
+        pygame.draw.rect(surface, (0, 0, 0), self.rect)
+        text_surface = self.font.render(self.text, True, (255, 255, 255))
         text_rect = text_surface.get_rect(center=self.rect.center)
         surface.blit(text_surface, text_rect)
 
     def is_clicked(self, mouse_pos):
         return self.rect.collidepoint(mouse_pos)
-buttons = [button(WIDTH // 2 - 100, HEIGHT // 2 - 25, 200, 50, "Start Game")]
-
+    
+buttons = [button(WIDTH // 2 - 100, HEIGHT // 2 - 25, 200, 50, "Start Game"),
+           button(WIDTH // 2 - 100, HEIGHT // 2 + 50, 200, 50, "Shop")]
 dino = Dino()
 birds = [birds(WIDTH + i * 300, random.randint(50, HEIGHT - 50)) for i in range(5)]
 catis = [cati(WIDTH + i * 300, HEIGHT - 15) for i in range(3)]
@@ -270,6 +271,9 @@ bacground_image = pygame.transform.scale(bacground_image, (WIDTH, HEIGHT))
 diedscreenBG = pygame.image.load("assets/diedBG.png").convert()
 diedscreenBG = pygame.transform.scale(diedscreenBG, (WIDTH, HEIGHT))
 
+
+MainMenuBG = pygame.image.load("assets/dinoJumpMM.png").convert()
+MainMenuBG = pygame.transform.scale(MainMenuBG, (WIDTH, HEIGHT))
 def GameLoop():
     obsticals = birds + catis
     global dino
@@ -368,7 +372,7 @@ def died():
 def show_start_screen():
     running = True
     while running:
-        screen.fill((0, 0, 0))
+        screen.blit(MainMenuBG, (0, 0))
         for button in buttons:
             button.draw(screen)
 
@@ -377,8 +381,29 @@ def show_start_screen():
                 pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if button.is_clicked(event.pos):
+                if buttons[0].is_clicked(event.pos):
                     return "game"
+                if buttons[1].is_clicked(event.pos):
+                    return "shop"
+
+        pygame.display.flip()
+
+def show_shop():
+    running = True
+    while running:
+        screen.fill((0, 0, 0))  # Clear the screen with black
+        font = pygame.font.Font(None, 72)
+        shop_text = font.render("SHOP", True, (255, 255, 255))
+        text_rect = shop_text.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+        screen.blit(shop_text, text_rect)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:  # Press ESC to return to the main menu
+                    return "start"
 
         pygame.display.flip()
 
@@ -390,3 +415,5 @@ while True:
         scene = died()
     elif scene == "start":
         scene = show_start_screen()
+    elif scene == "shop":
+        scene = show_shop()
