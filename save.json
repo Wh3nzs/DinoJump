@@ -1,1 +1,26 @@
-{"highscore": 11.98, "Name": "whenz", "current_skin": "default"}
+{
+  "highscore": 14.72,
+  "Name": "whenz",
+  "players": {
+    "whenz": {
+      "name": "whenz",
+      "points": 6.9,
+      "owned": [
+        "default",
+        "forest",
+        "lava"
+      ],
+      "skin": "default"
+    },
+    "jon": {
+      "name": "jon",
+      "points": 3.56,
+      "owned": [
+        "default"
+      ],
+      "skin": "default"
+    }
+  },
+  "active_player": "jon",
+  "current_skin": "forest"
+}
