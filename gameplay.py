@@ -3,10 +3,9 @@ import pygame
 from settings import screen
 from player import Dino
 from obstacles import birds, catis
-from screens import ask_name, bacground_image
-from save_data import data, save
+from screens import bacground_image
+from save_data import finish_run
 
-dino = Dino()
 def GameLoop():
     obsticals = birds + catis
     global dino
@@ -38,9 +37,7 @@ def GameLoop():
             bird.update(dt)
             bird.draw()
             if bird.collision(dino):
-                running = False
-                if data["highscore"] < total:
-                    save(total, ask_name())
+                finish_run(total)
                 return "died"
 
         for cati in catis:
@@ -48,9 +45,7 @@ def GameLoop():
             cati.update(dt)
             cati.draw()
             if cati.collision(dino):
-                running = False 
-                if data["highscore"] < total:
-                    save(total, ask_name())
+                finish_run(total)
                 return "died"
 
 
